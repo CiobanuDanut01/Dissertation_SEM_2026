@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreightIT.WebApp", "FreightIT.WebApp\FreightIT.WebApp.csproj", "{B5BD9595-4512-42FC-82F4-8BBF4B5F7313}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreightIT.DriverService", "FreightIT.DriverService\FreightIT.DriverService.csproj", "{E7294D01-4B32-45E8-8B04-05FC61E50474}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreightIT.TruckService", "FreightIT.TruckService\FreightIT.TruckService.csproj", "{07447096-70D3-414F-9E35-E6787BDE1FD3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreightIT.InvoiceService", "FreightIT.InvoiceService\FreightIT.InvoiceService.csproj", "{3E326D3D-A78E-461D-8FD6-7A50AEDF90CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreightIT.OrderService", "FreightIT.OrderService\FreightIT.OrderService.csproj", "{756F843D-3A83-40F5-A0FC-46000797C444}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreightIT.RouteService", "FreightIT.RouteService\FreightIT.RouteService.csproj", "{ED56A07A-CEE5-4334-882C-F134999B63CB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B5BD9595-4512-42FC-82F4-8BBF4B5F7313}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5BD9595-4512-42FC-82F4-8BBF4B5F7313}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5BD9595-4512-42FC-82F4-8BBF4B5F7313}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5BD9595-4512-42FC-82F4-8BBF4B5F7313}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7294D01-4B32-45E8-8B04-05FC61E50474}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7294D01-4B32-45E8-8B04-05FC61E50474}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7294D01-4B32-45E8-8B04-05FC61E50474}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7294D01-4B32-45E8-8B04-05FC61E50474}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07447096-70D3-414F-9E35-E6787BDE1FD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07447096-70D3-414F-9E35-E6787BDE1FD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07447096-70D3-414F-9E35-E6787BDE1FD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07447096-70D3-414F-9E35-E6787BDE1FD3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E326D3D-A78E-461D-8FD6-7A50AEDF90CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E326D3D-A78E-461D-8FD6-7A50AEDF90CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E326D3D-A78E-461D-8FD6-7A50AEDF90CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E326D3D-A78E-461D-8FD6-7A50AEDF90CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{756F843D-3A83-40F5-A0FC-46000797C444}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{756F843D-3A83-40F5-A0FC-46000797C444}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{756F843D-3A83-40F5-A0FC-46000797C444}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{756F843D-3A83-40F5-A0FC-46000797C444}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED56A07A-CEE5-4334-882C-F134999B63CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED56A07A-CEE5-4334-882C-F134999B63CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED56A07A-CEE5-4334-882C-F134999B63CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED56A07A-CEE5-4334-882C-F134999B63CB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

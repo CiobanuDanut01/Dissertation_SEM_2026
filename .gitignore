@@ -1,0 +1,33 @@
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# Rider specific files
+.idea/
+
+# Sensitive configuration files
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json 
+
+# HTTP client environment variables
+.idea/httpRequests/
+
+# Other
+*.http
+*.sln.iml

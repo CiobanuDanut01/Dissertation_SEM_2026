@@ -1,0 +1,254 @@
+@page "/trucks"
+@rendermode InteractiveServer
+
+@* --- Imports for HTTP calls and validation --- *@
+@using System.Net.Http.Json
+@using System.ComponentModel.DataAnnotations
+@inject IHttpClientFactory HttpClientFactory
+
+<PageTitle>FreightIT - Trucks</PageTitle>
+
+<h1>Truck Management</h1>
+
+@* --- CREATE NEW TRUCK FORM --- *@
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h3>Create New Truck</h3>
+    </div>
+    <div class="card-body">
+        <EditForm Model="@newTruck" OnValidSubmit="@HandleCreateTruck">
+            <AntiforgeryToken />
+            <DataAnnotationsValidator />
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">License Plate</label>
+                    <InputText class="form-control" @bind-Value="newTruck.LicensePlate" />
+                    <ValidationMessage For="@(() => newTruck.LicensePlate)" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Make</label>
+                    <InputText class="form-control" @bind-Value="newTruck.Make" />
+                    <ValidationMessage For="@(() => newTruck.Make)" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Model</label>
+                    <InputText class="form-control" @bind-Value="newTruck.Model" />
+                    <ValidationMessage For="@(() => newTruck.Model)" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Year</label>
+                    <InputNumber class="form-control" @bind-Value="newTruck.Year" />
+                    <ValidationMessage For="@(() => newTruck.Year)" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Mileage</label>
+                    <InputNumber class="form-control" @bind-Value="newTruck.Mileage" />
+                    <ValidationMessage For="@(() => newTruck.Mileage)" />
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">
+                <span class="bi bi-plus-circle-fill"></span> Create Truck
+            </button>
+        </EditForm>
+    </div>
+</div>
+@* --- END OF FORM --- *@
+
+
+<h2>Current Trucks</h2>
+
+@* --- TRUCK LIST TABLE --- *@
+@if (trucks == null)
+{
+    <p><em>Loading trucks... please wait.</em></p>
+}
+else if (trucks.Length == 0)
+{
+    <p><em>No trucks found in the database.</em></p>
+}
+else
+{
+    <table class="table table-striped table-hover shadow-sm rounded-3">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>License Plate</th>
+                <th>Make</th>
+                <th>Model</th>
+                <th>Year</th>
+                <th>Mileage</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var truck in trucks)
+            {
+                <tr>
+                    <td>@truck.Id</td>
+                    <td>@truck.LicensePlate</td>
+                    <td>@truck.Make</td>
+                    <td>@truck.Model</td>
+                    <td>@truck.Year</td>
+                    <td>@truck.Mileage.ToString("N0")</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" @onclick="@(() => HandleDeleteTruck(truck.Id))">
+                            <span class="bi bi-trash-fill"></span> Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@* --- C# CODE SECTION --- *@
+@code {
+    // Holds the list of trucks
+    private Truck[]? trucks;
+
+    // Holds the data for the "Create New Truck" form
+    private Truck newTruck = new();
+
+    // Holds our HTTP client for API calls
+    private HttpClient? httpClient;
+
+    // Runs automatically when the page loads
+    protected override async Task OnInitializedAsync()
+    {
+        // Create the HTTP client for TruckService
+        httpClient = HttpClientFactory.CreateClient("TruckService");
+        
+        // Load the initial list of trucks
+        await LoadTrucksAsync();
+    }
+
+    // Loads trucks from the API
+    private async Task LoadTrucksAsync()
+    {
+        if (httpClient == null) return;
+
+        try
+        {
+            // Make the GET call to the API
+            trucks = await httpClient.GetFromJsonAsync<Truck[]>("/trucks");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching trucks: {ex.Message}");
+            trucks = Array.Empty<Truck>();
+        }
+    }
+
+    // Handles the form submission to create a new truck
+    private async Task HandleCreateTruck()
+    {
+        Console.WriteLine("HandleCreateTruck called!");
+        
+        if (httpClient == null)
+        {
+            Console.WriteLine("ERROR: httpClient is null!");
+            return;
+        }
+        
+        Console.WriteLine($"Creating truck: {newTruck.LicensePlate} - {newTruck.Make} {newTruck.Model}");
+        
+        try
+        {
+            // Make the POST call to create a new truck
+            var response = await httpClient.PostAsJsonAsync("/trucks", newTruck);
+
+            Console.WriteLine($"Response status: {response.StatusCode}");
+
+            // Check if the call was successful
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Truck created successfully!");
+                
+                // Clear the form by resetting newTruck
+                newTruck = new();
+
+                // Reload the list to show the new truck
+                await LoadTrucksAsync();
+            }
+            else
+            {
+                // The API returned an error
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error creating truck: {errorContent}");
+            }
+        }
+        catch (Exception ex)
+        {
+            // The HTTP call failed
+            Console.WriteLine($"Exception creating truck: {ex.Message}");
+        }
+    }
+
+    // NEW FEATURE: Handles deleting a truck
+    private async Task HandleDeleteTruck(int truckId)
+    {
+        Console.WriteLine($"HandleDeleteTruck called for truck ID: {truckId}");
+        
+        if (httpClient == null)
+        {
+            Console.WriteLine("ERROR: httpClient is null!");
+            return;
+        }
+        
+        try
+        {
+            // Make the DELETE call to remove the truck
+            var response = await httpClient.DeleteAsync($"/trucks/{truckId}");
+
+            Console.WriteLine($"Delete response status: {response.StatusCode}");
+
+            // Check if the delete was successful
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Truck {truckId} deleted successfully!");
+                
+                // Reload the list to reflect the deletion
+                await LoadTrucksAsync();
+            }
+            else
+            {
+                // The API returned an error
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error deleting truck: {errorContent}");
+            }
+        }
+        catch (Exception ex)
+        {
+            // The HTTP call failed
+            Console.WriteLine($"Exception deleting truck: {ex.Message}");
+        }
+    }
+
+
+    // The Truck class - defines what data a truck has
+    public class Truck
+    {
+        public int Id { get; set; }
+        
+        [Required]
+        public string? LicensePlate { get; set; }
+        
+        [Required]
+        public string? Make { get; set; }
+        
+        [Required]
+        public string? Model { get; set; }
+        
+        [Range(1950, 2100)]
+        public int Year { get; set; } = DateTime.Now.Year;
+        
+        [Range(0, 5000000)]
+        public int Mileage { get; set; }
+    }
+}
+

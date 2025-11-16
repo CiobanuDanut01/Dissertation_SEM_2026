@@ -1,0 +1,221 @@
+@page "/drivers"
+@rendermode InteractiveServer
+
+@* --- These are the "imports" for our "phone" and "validation" tools --- *@
+@using System.Net.Http.Json
+@using System.ComponentModel.DataAnnotations
+@inject IHttpClientFactory HttpClientFactory
+
+<PageTitle>FreightIT - Drivers</PageTitle>
+
+<h1>Driver Management</h1>
+
+@* --- THIS IS THE NEW "CREATE DRIVER" FORM --- *@
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h3>Create New Driver</h3>
+    </div>
+    <div class="card-body">
+        @*
+          'EditForm' is Blazor's special form component.
+          We "bind" it to our 'newDriver' object.
+          'OnValidSubmit' is a "magic" event that ONLY runs
+          if all the '[Required]' rules are passed.
+        *@
+        <EditForm Model="@newDriver" OnValidSubmit="@HandleCreateDriver">
+            <AntiforgeryToken />
+
+            @* This component is the "rule enforcer" that reads the [Required] sticky notes *@
+            <DataAnnotationsValidator />
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">First Name</label>
+                    @*
+                      'InputText' is a Blazor component.
+                      '@bind-Value' creates a "two-way-binding."
+                      The textbox shows what's in 'newDriver.FirstName'.
+                      If you type in the box, it updates 'newDriver.FirstName'.
+                    *@
+                    <InputText class="form-control" @bind-Value="newDriver.FirstName" />
+                    @* This shows an error message *only* for this field *@
+                    <ValidationMessage For="@(() => newDriver.FirstName)" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Last Name</label>
+                    <InputText class="form-control" @bind-Value="newDriver.LastName" />
+                    <ValidationMessage For="@(() => newDriver.LastName)" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">License Number</label>
+                    <InputText class="form-control" @bind-Value="newDriver.LicenseNumber" />
+                    <ValidationMessage For="@(() => newDriver.LicenseNumber)" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Date of Birth</label>
+                    <InputDate class="form-control" @bind-Value="newDriver.DateOfBirth" />
+                    <ValidationMessage For="@(() => newDriver.DateOfBirth)" />
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">
+                <span class="bi bi-plus-circle-fill"></span> Create Driver
+            </button>
+        </EditForm>
+    </div>
+</div>
+@* --- END OF NEW FORM --- *@
+
+
+<h2>Current Drivers</h2>
+
+@* --- This "List" section is the same as before --- *@
+@if (drivers == null)
+{
+    <p><em>Loading drivers... please wait.</em></p>
+}
+else if (drivers.Length == 0)
+{
+    <p><em>No drivers found in the database.</em></p>
+}
+else
+{
+    <table class="table table-striped table-hover shadow-sm rounded-3">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>License Number</th>
+                <th>Date of Birth</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var driver in drivers)
+            {
+                <tr>
+                    <td>@driver.Id</td>
+                    <td>@driver.FirstName</td>
+                    <td>@driver.LastName</td>
+                    <td>@driver.LicenseNumber</td>
+                    <td>@driver.DateOfBirth.ToShortDateString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@* --- THIS IS THE UPDATED C# SECTION --- *@
+@code {
+    // This "box" holds our list of drivers (same as before)
+    private Driver[]? drivers;
+
+    // --- NEW ---
+    // This "box" holds the data for the "Create New Driver" form
+    // We 'new()' it up so it's a blank, ready-to-use object.
+    private Driver newDriver = new();
+
+    // --- NEW ---
+    // This "box" will hold our "phone" so all methods can share it
+    private HttpClient? httpClient;
+
+    // This method runs automatically when the page loads
+    // This is our "refactored" version. It's much cleaner.
+    protected override async Task OnInitializedAsync()
+    {
+        // 1. "Hire" the "phone company" and get our "DriverService" phone
+        httpClient = HttpClientFactory.CreateClient("DriverService");
+        
+        // 2. Call our new "LoadDriversAsync" method to load the list
+        await LoadDriversAsync();
+    }
+
+
+    // --- NEW "REFACTORED" METHOD ---
+    // We moved the "loading" logic into its own method.
+    // *Why?* So we can "reload the list" after we create a new driver!
+    private async Task LoadDriversAsync()
+    {
+        if (httpClient == null) return; // Safety check
+
+        try
+        {
+            // Make the "GET" call to the API
+            drivers = await httpClient.GetFromJsonAsync<Driver[]>("/drivers");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching drivers: {ex.Message}");
+            drivers = Array.Empty<Driver>();
+        }
+    }
+
+    // --- NEW "FORM HANDLER" METHOD ---
+    // This method is called by 'OnValidSubmit' on our <EditForm>
+    // It will *only* run if the form is valid (no [Required] errors)
+    private async Task HandleCreateDriver()
+    {
+        Console.WriteLine("HandleCreateDriver called!");
+        
+        if (httpClient == null)
+        {
+            Console.WriteLine("ERROR: httpClient is null!");
+            return;
+        }
+        
+        Console.WriteLine($"Creating driver: {newDriver.FirstName} {newDriver.LastName}");
+        
+        try
+        {
+            // 1. THIS IS THE "CREATE" (POST) CALL
+            // We make a "POST" call to the "/drivers" "order",
+            // and we send our 'newDriver' object as the "body" (payload).
+            var response = await httpClient.PostAsJsonAsync("/drivers", newDriver);
+
+            Console.WriteLine($"Response status: {response.StatusCode}");
+
+            // 2. Check if the call was a success
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Driver created successfully!");
+                
+                // 3. It worked! Clear the form by "resetting" newDriver
+                newDriver = new();
+
+                // 4. Reload the list of drivers to show the new one!
+                // This is why we created LoadDriversAsync()
+                await LoadDriversAsync();
+            }
+            else
+            {
+                // The API returned an error
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error creating driver: {errorContent}");
+            }
+        }
+        catch (Exception ex)
+        {
+            // The "phone call" itself failed (e.g., API is offline)
+            Console.WriteLine($"Exception creating driver: {ex.Message}");
+        }
+    }
+
+
+    // --- This "blueprint" class is the same as before ---
+    // (But with the [Required] attributes we added)
+    public class Driver
+    {
+        public int Id { get; set; }
+        [Required]
+        public string? FirstName { get; set; }
+        [Required]
+        public string? LastName { get; set; }
+        [Required]
+        public string? LicenseNumber { get; set; }
+        [Required]
+        public DateTime DateOfBirth { get; set; } = DateTime.Today.AddYears(-21);
+    }
+}

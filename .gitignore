@@ -23,6 +23,7 @@ bld/
 # Sensitive configuration files
 appsettings.Development.json
 appsettings.*.json
+launchSettings.json
 !appsettings.json 
 
 # HTTP client environment variables
